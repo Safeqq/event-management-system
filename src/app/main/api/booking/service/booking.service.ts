@@ -1,4 +1,4 @@
-import { Booking } from "../../../domain/aggregates/booking";
+import { Booking } from "../../../domain/entities/booking";
 import { Money } from "../../../domain/value-objects/money";
 
 export interface CreateBookingInput {

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "bun:test";
-import { Event, TicketCategory } from "../aggregates/event";
-import { Booking, BookingItem } from "../aggregates/booking";
+import { Event, TicketCategory } from "../entities/event";
+import { Booking, BookingItem } from "../entities/booking";
 import { Ticket } from "../entities/ticket";
 import { Refund } from "../entities/refund";
 import { User } from "../entities/user";
@@ -14,7 +14,6 @@ describe("User Story: Organizer creates & publishes event", () => {
   it("should create event with draft status", () => {
     const event = new Event("1", "Workshop", "Desc", new Date(), "Surabaya", "draft", [], "org1", new Date(), new Date());
     expect(event.status).toBe("draft");
-    expect(event.domainEvents).toHaveLength(1);
   });
 
   it("should publish event with categories", () => {

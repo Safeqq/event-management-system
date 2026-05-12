@@ -1,26 +1,23 @@
-# Event Management System — DDD Structure
+# Event Management System — Clean Architecture
 
-Backend API untuk **Event Ticketing & Booking System** menggunakan **Bun + ElysiaJS + TypeScript** dengan pola **Domain-Driven Design**.
+Backend API untuk **Event Ticketing & Booking System** menggunakan **Bun + ElysiaJS + TypeScript** dengan pola **Clean Architecture & DDD Tactical Patterns**.
 
-## DDD Tactical Patterns — 7 Komponen Utama
+## Struktur Domain — 5 Komponen Utama
 
-### 1. Aggregates — `domain/aggregates/`
-| File | Deskripsi |
-|---|---|
-| `aggregate-root.ts` | Abstract base class dengan domain event tracking |
-| `event.ts` | Event aggregate (status: draft, published, cancelled) |
-| `booking.ts` | Booking aggregate (status: pending, paid, cancelled, expired, refunded) |
-
-### 2. Entities — `domain/entities/`
+### 1. Entities — `domain/entities/`
 | File | Deskripsi |
 |---|---|
 | `entity.ts` | Abstract base class dengan `equals()` berdasarkan ID |
+| `event.ts` | **Event aggregate root** dengan business logic (publish, cancel) |
+| `booking.ts` | **Booking aggregate root** dengan business logic (pay, cancel, expire) |
 | `user.ts` | User entity (role: organizer, customer, admin) |
 | `ticket.ts` | Ticket entity (status: active, used, refunded, cancelled) |
 | `refund.ts` | Refund entity (status: requested, approved, rejected, paid_out) |
 | `promo-code.ts` | PromoCode entity (discount: percentage/fixed) |
 
-### 3. Value Objects — `domain/value-objects/`
+> **Note**: `Event` dan `Booking` berfungsi sebagai **aggregate roots** yang mengenkapsulasi business logic dan invariants, namun ditempatkan di folder `entities/` tanpa folder `aggregates/` terpisah untuk kesederhanaan struktur.
+
+### 2. Value Objects — `domain/value-objects/`
 | File | Deskripsi |
 |---|---|
 | `email.ts` | Validated email value object |
@@ -28,7 +25,7 @@ Backend API untuk **Event Ticketing & Booking System** menggunakan **Bun + Elysi
 | `date-range.ts` | Date range with `contains()` & `isActive()` |
 | `ticket-code.ts` | Auto-generated unique ticket code (nanoid) |
 
-### 4. Domain Services — `api/*/service/`
+### 3. Domain Services — `api/*/service/`
 | File | Deskripsi |
 |---|---|
 | `api/event/service/event.service.ts` | Event service (create, publish, cancel) |
@@ -40,13 +37,7 @@ Backend API untuk **Event Ticketing & Booking System** menggunakan **Bun + Elysi
 | `api/dashboard/service/dashboard.service.ts` | Dashboard service (stats) |
 | `api/customer/service/customer.service.ts` | Customer service (bookings, tickets) |
 
-### 5. Domain Events — `domain/domain-events/`
-| File | Deskripsi |
-|---|---|
-| `domain-event.ts` | Base interface (`occurredAt`, `eventType`) |
-| `events.ts` | Event classes: EventCreated, BookingPaid, TicketReserved, dll. |
-
-### 6. Repository Interfaces — `api/*/repository/`
+### 4. Repository Interfaces — `api/*/repository/`
 | File | Deskripsi |
 |---|---|
 | `api/event/repository/event-repository.ts` | Event repository interface |
@@ -56,7 +47,7 @@ Backend API untuk **Event Ticketing & Booking System** menggunakan **Bun + Elysi
 | `api/auth/repository/user-repository.ts` | User repository interface |
 | `api/promo-code/repository/promo-code-repository.ts` | PromoCode repository interface |
 
-### 7. Domain Unit Tests — `domain/tests/`
+### 5. Domain Unit Tests — `domain/tests/`
 | File | User Story |
 |---|---|
 | `value-objects.test.ts` | Email, Money, DateRange, TicketCode — validasi value object |
@@ -70,7 +61,6 @@ bun test src/app/main/domain/tests/
 ```
 26 pass
  0 fail
-34 expect() calls
 ```
 
 ## Running Tests
@@ -90,9 +80,9 @@ bun test src/app/main/domain/tests/entities.test.ts
 ### Event Organizer
 | Sebagai… | Saya ingin… | Sehingga… | Terkait |
 |---|---|---|---|
-| Organizer | membuat event dengan kategori tiket | peserta bisa memilih tiket yang sesuai | `Event` aggregate, `EventService` |
-| Organizer | mempublikasikan event | event bisa mulai dijual | `Event` aggregate, `EventService` |
-| Organizer | membatalkan event | peserta tidak bisa booking lagi | `Event` aggregate, `EventService` |
+| Organizer | membuat event dengan kategori tiket | peserta bisa memilih tiket yang sesuai | `Event` entity, `EventService` |
+| Organizer | mempublikasikan event | event bisa mulai dijual | `Event` entity, `EventService` |
+| Organizer | membatalkan event | peserta tidak bisa booking lagi | `Event` entity, `EventService` |
 | Organizer | melihat laporan penjualan | tahu jumlah tiket terjual & revenue | `DashboardService` |
 | Organizer | menyetujui/menolak refund | mengelola permintaan refund peserta | `RefundService` |
 
@@ -101,7 +91,7 @@ bun test src/app/main/domain/tests/entities.test.ts
 |---|---|---|---|
 | Customer | mendaftar akun | bisa melakukan booking | `User` entity, `AuthService` |
 | Customer | melihat daftar event | memilih event yang ingin dihadiri | `EventRepository` |
-| Customer | booking tiket | mendapatkan tiket masuk event | `Booking` aggregate, `BookingService` |
+| Customer | booking tiket | mendapatkan tiket masuk event | `Booking` entity, `BookingService` |
 | Customer | membayar booking | tiket saya aktif | `BookingService` |
 | Customer | request refund | mendapatkan uang kembali | `Refund` entity, `RefundService` |
 | Customer | melihat tiket saya | tahu tiket yang sudah dibeli | `TicketService` |
@@ -121,4 +111,4 @@ bun test src/app/main/domain/tests/entities.test.ts
 - **Runtime**: [Bun](https://bun.sh/)
 - **Framework**: [ElysiaJS](https://elysiajs.com/)
 - **Language**: TypeScript
-- **Architecture**: DDD Tactical Patterns
+- **Architecture**: Clean Architecture & DDD Tactical Patterns
