@@ -20,4 +20,20 @@ export class Ticket extends Entity {
   ) {
     super(id);
   }
+
+  checkIn(): void {
+    if (this.status !== "active") throw new Error("Only active tickets can be checked in");
+    this.status = "used";
+    this.checkedInAt = new Date();
+  }
+
+  markRefunded(): void {
+    if (this.status !== "active") throw new Error("Only active tickets can be refunded");
+    this.status = "refunded";
+  }
+
+  cancel(): void {
+    if (this.status !== "active") throw new Error("Only active tickets can be cancelled");
+    this.status = "cancelled";
+  }
 }

@@ -16,4 +16,22 @@ export class Refund extends Entity {
   ) {
     super(id);
   }
+
+  approve(): void {
+    if (this.status !== "requested") throw new Error("Only requested refunds can be approved");
+    this.status = "approved";
+    this.resolvedAt = new Date();
+  }
+
+  reject(reason: string): void {
+    if (this.status !== "requested") throw new Error("Only requested refunds can be rejected");
+    this.status = "rejected";
+    this.resolvedAt = new Date();
+    this.rejectionReason = reason;
+  }
+
+  payout(): void {
+    if (this.status !== "approved") throw new Error("Only approved refunds can be paid out");
+    this.status = "paid_out";
+  }
 }

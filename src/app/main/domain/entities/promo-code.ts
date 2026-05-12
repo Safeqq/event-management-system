@@ -18,4 +18,26 @@ export class PromoCode extends Entity {
   ) {
     super(id);
   }
+
+  validate(purchaseAmount: Money): { valid: boolean; discountAmount: number; finalAmount: number } {
+    if (!this.isActive) return { valid: false, discountAmount: 0, finalAmount: purchaseAmount.amount };
+    if (!this.validPeriod.isActive()) return { valid: false, discountAmount: 0, finalAmount: purchaseAmount.amount };
+    if (this.usedCount >= this.maxUsage) return { valid: false, discountAmount: 0, finalAmount: purchaseAmount.amount };
+    if (purchaseAmount.amount < this.minPurchase.amount) return { valid: false, discountAmount: 0, finalAmount: purchaseAmount.amount };
+
+    let discount = this.discountType === "percentage"
+      ? purchaseAmount.amount * (this.discountValue / 100)
+      : this.discountValue;
+
+    discount = Math.min(discount, purchaseAmount.amount);
+    return { valid: true, discountAmount: discount, finalAmount: purchaseAmount.amount - discount };
+  }
+
+  use(): void {
+    this.usedCount++;
+  }
+
+  deactivate(): void {
+    this.isActive = false;
+  }
 }

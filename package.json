@@ -8,6 +8,7 @@
     "start": "bun src/main.ts",
     "build": "bun build src/index.ts --outdir dist --target bun --external elysia --external @elysiajs/swagger --external drizzle-orm --external postgres --external nanoid",
     "test": "bun test",
+    "test:domain": "bun test src/app/main/domain/tests/",
     "lint:error": "tsc --noEmit --pretty false | Select-String \"error\"",
     "typecheck": "tsc --noEmit",
     "db:generate": "drizzle-kit generate",
