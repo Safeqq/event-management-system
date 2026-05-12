@@ -1,4 +1,4 @@
-import { Booking } from "../../../domain/aggregates/booking";
+import { Booking } from "../../../domain/entities/booking";
 
 export interface BookingRepository {
   findById(id: string): Promise<Booking | null>;

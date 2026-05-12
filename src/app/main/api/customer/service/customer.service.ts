@@ -1,4 +1,4 @@
-import { Booking } from "../../../domain/aggregates/booking";
+import { Booking } from "../../../domain/entities/booking";
 import { Ticket } from "../../../domain/entities/ticket";
 
 export interface CustomerService {

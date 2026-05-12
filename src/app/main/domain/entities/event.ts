@@ -1,5 +1,4 @@
-import { AggregateRoot } from "./aggregate-root";
-import { EventCreated, EventPublished, EventCancelled } from "../domain-events/events";
+import { Entity } from "./entity";
 
 export type EventStatus = "draft" | "published" | "cancelled";
 
@@ -11,7 +10,7 @@ export interface TicketCategory {
   remaining: number;
 }
 
-export class Event extends AggregateRoot {
+export class Event extends Entity {
   constructor(
     public readonly id: string,
     public title: string,
@@ -24,8 +23,7 @@ export class Event extends AggregateRoot {
     public readonly createdAt: Date,
     public updatedAt: Date,
   ) {
-    super();
-    this.addDomainEvent(new EventCreated(this.id, this.organizerId));
+    super(id);
   }
 
   publish(): void {
@@ -33,13 +31,11 @@ export class Event extends AggregateRoot {
     if (this.categories.length === 0) throw new Error("Event must have at least one ticket category");
     this.status = "published";
     this.updatedAt = new Date();
-    this.addDomainEvent(new EventPublished(this.id));
   }
 
   cancel(): void {
     if (this.status === "cancelled") throw new Error("Event is already cancelled");
     this.status = "cancelled";
     this.updatedAt = new Date();
-    this.addDomainEvent(new EventCancelled(this.id));
   }
 }

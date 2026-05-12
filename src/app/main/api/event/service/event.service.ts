@@ -1,4 +1,4 @@
-import { Event } from "../../../domain/aggregates/event";
+import { Event } from "../../../domain/entities/event";
 
 export interface CreateEventInput {
   title: string;
