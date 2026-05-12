@@ -2,7 +2,7 @@
 
 Backend API untuk **Event Ticketing & Booking System** menggunakan **Bun + ElysiaJS + TypeScript** dengan pola **Clean Architecture & DDD Tactical Patterns**.
 
-## Struktur Domain — 5 Komponen Utama
+## Struktur Domain — 7 Komponen Utama
 
 ### 1. Entities — `domain/entities/`
 | File | Deskripsi |
@@ -15,9 +15,15 @@ Backend API untuk **Event Ticketing & Booking System** menggunakan **Bun + Elysi
 | `refund.ts` | Refund entity (status: requested, approved, rejected, paid_out) |
 | `promo-code.ts` | PromoCode entity (discount: percentage/fixed) |
 
-> **Note**: `Event` dan `Booking` berfungsi sebagai **aggregate roots** yang mengenkapsulasi business logic dan invariants, namun ditempatkan di folder `entities/` tanpa folder `aggregates/` terpisah untuk kesederhanaan struktur.
+### 2. Aggregates
+**Event** dan **Booking** berfungsi sebagai **aggregate roots** yang mengenkapsulasi business logic dan invariants:
 
-### 2. Value Objects — `domain/value-objects/`
+- **Event Aggregate**: Mengelola lifecycle event (draft → published → cancelled) dan ticket categories
+- **Booking Aggregate**: Mengelola proses booking (pending → paid/cancelled/expired/refunded) dan booking items
+
+> **Note**: Aggregate roots ditempatkan di folder `entities/` tanpa folder `aggregates/` terpisah untuk kesederhanaan struktur.
+
+### 3. Value Objects — `domain/value-objects/`
 | File | Deskripsi |
 |---|---|
 | `email.ts` | Validated email value object |
@@ -25,7 +31,7 @@ Backend API untuk **Event Ticketing & Booking System** menggunakan **Bun + Elysi
 | `date-range.ts` | Date range with `contains()` & `isActive()` |
 | `ticket-code.ts` | Auto-generated unique ticket code (nanoid) |
 
-### 3. Domain Services — `api/*/service/`
+### 4. Domain Services — `api/*/service/`
 | File | Deskripsi |
 |---|---|
 | `api/event/service/event.service.ts` | Event service (create, publish, cancel) |
@@ -37,7 +43,15 @@ Backend API untuk **Event Ticketing & Booking System** menggunakan **Bun + Elysi
 | `api/dashboard/service/dashboard.service.ts` | Dashboard service (stats) |
 | `api/customer/service/customer.service.ts` | Customer service (bookings, tickets) |
 
-### 4. Repository Interfaces — `api/*/repository/`
+### 5. Domain Events — `domain/domain-events/`
+| File | Deskripsi |
+|---|---|
+| `domain-event.ts` | Base interface untuk domain events (`occurredAt`, `eventType`) |
+| `events.ts` | Event classes: EventCreated, EventPublished, EventCancelled, BookingCreated, BookingPaid, BookingCancelled |
+
+> **Note**: Domain events digunakan untuk komunikasi antar bounded contexts dan tracking perubahan penting dalam domain.
+
+### 6. Repository Interfaces — `api/*/repository/`
 | File | Deskripsi |
 |---|---|
 | `api/event/repository/event-repository.ts` | Event repository interface |
@@ -47,7 +61,7 @@ Backend API untuk **Event Ticketing & Booking System** menggunakan **Bun + Elysi
 | `api/auth/repository/user-repository.ts` | User repository interface |
 | `api/promo-code/repository/promo-code-repository.ts` | PromoCode repository interface |
 
-### 5. Domain Unit Tests — `domain/tests/`
+### 7. Domain Unit Tests — `domain/tests/`
 | File | User Story |
 |---|---|
 | `value-objects.test.ts` | Email, Money, DateRange, TicketCode — validasi value object |
