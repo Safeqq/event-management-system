@@ -1,4 +1,4 @@
-import type { UserState } from "../aggregates/user";
+import type { UserState } from "../entities/user";
 
 export interface UserRepository {
   findById(id: string): Promise<UserState | null>;

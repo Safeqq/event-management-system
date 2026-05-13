@@ -1,4 +1,4 @@
-import type { PromoCodeState } from "../aggregates/promo-code";
+import type { PromoCodeState } from "../entities/promo-code";
 
 export interface PromoCodeRepository {
   findById(id: string): Promise<PromoCodeState | null>;

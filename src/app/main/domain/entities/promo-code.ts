@@ -1,4 +1,4 @@
-import type { Entity } from "../entities/entity";
+import type { Entity } from "./entity";
 import type { Money } from "../value-objects/money";
 import type { DateRange } from "../value-objects/date-range";
 

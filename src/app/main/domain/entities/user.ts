@@ -1,5 +1,5 @@
 import type { Email } from "../value-objects/email";
-import type { Entity } from "../entities/entity";
+import type { Entity } from "./entity";
 
 export type UserRole = "organizer" | "customer" | "admin";
 

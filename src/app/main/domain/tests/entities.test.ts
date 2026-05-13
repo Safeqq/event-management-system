@@ -1,5 +1,5 @@
 import { describe, it, expect } from "bun:test";
-import { createUser } from "../aggregates/user";
+import { createUser } from "../entities/user";
 import { createEmail } from "../value-objects/email";
 
 describe("User", () => {

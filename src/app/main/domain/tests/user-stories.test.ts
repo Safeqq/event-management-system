@@ -32,12 +32,12 @@ import {
   rejectRefund,
   payoutRefund,
 } from "../aggregates/refund";
-import { createUser } from "../aggregates/user";
+import { createUser } from "../entities/user";
 import {
   createPromoCode,
   validatePromoCode,
   deactivatePromoCode,
-} from "../aggregates/promo-code";
+} from "../entities/promo-code";
 import { createEmail } from "../value-objects/email";
 import { createMoney } from "../value-objects/money";
 import { createDateRange } from "../value-objects/date-range";
