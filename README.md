@@ -114,6 +114,222 @@ Proyek ini dikembangkan untuk **EF2344-02 Konstruksi Perangkat Lunak** -- **Depa
 | 11 | Refund cannot be approved if not in Requested status | Pass |
 | 12 | Rejected refund must have a rejection reason | Pass |
 
+### 8. User Story Implementation Map
+
+| # | User Story | Aggregate / Entity | Domain Event | Domain Service | Status |
+|---|---|---|---|---|---|
+| 1 | Create Event | `event.ts` -> `createEvent()` | `EventCreated` | -- | ✅ domain |
+| 2 | Publish Event | `event.ts` -> `publishEvent()` | `EventPublished` | -- | ✅ domain |
+| 3 | Cancel Event | `event.ts` -> `cancelEvent()` | `EventCancelled` | -- | ✅ domain |
+| 4 | Create Ticket Category | `event.ts` -> `addCategory()` | `TicketCategoryCreated` | -- | ✅ domain |
+| 5 | Disable Ticket Category | `event.ts` -> `disableCategory()` | `TicketCategoryDisabled` | -- | ✅ domain |
+| 6 | View Available Events | -- | -- | -- | ❌ app layer |
+| 7 | View Event Details | -- | -- | -- | ❌ app layer |
+| 8 | Create Ticket Booking | `booking.ts` -> `createBooking()` | `BookingCreated`, `TicketReserved` | `booking.service.ts` | ✅ domain |
+| 9 | Calculate Booking Total Price | `booking.ts` -> `getSubtotal()` | -- | `booking.service.ts` | ✅ domain |
+| 10 | Pay Booking | `booking.ts` -> `payBooking()` | `BookingPaid` | -- | ✅ domain |
+| 11 | Expire Booking | `booking.ts` -> `expireBooking()` | `BookingExpired` | -- | ✅ domain |
+| 12 | View Purchased Tickets | -- | -- | -- | ❌ app layer |
+| 13 | Check In Ticket | `ticket.ts` -> `checkInTicket()` | `TicketCheckedIn` | -- | ✅ domain |
+| 14 | Reject Invalid Ticket Check-in | `ticket.ts` -> `checkInTicket()` (enforced) | -- | -- | ✅ domain |
+| 15 | Request Refund | `refund.ts` -> `createRefund()` | `RefundRequested` | -- | ✅ domain |
+| 16 | Approve Refund | `refund.ts` -> `approveRefund()` | `RefundApproved` | -- | ✅ domain |
+| 17 | Reject Refund | `refund.ts` -> `rejectRefund()` | `RefundRejected` | -- | ✅ domain |
+| 18 | Mark Refund as Paid Out | `refund.ts` -> `payoutRefund()` | `RefundPaidOut` | -- | ✅ domain |
+| 19 | View Event Sales Report | -- | -- | -- | ❌ app layer |
+| 20 | View Event Participants | -- | -- | -- | ❌ app layer |
+
+Status: ✅ domain = logic ada di domain layer (Week 9-10), ❌ app layer = perlu application layer (Week 11)
+
+### 9. Domain Flows by User Story
+
+#### US1: Create Event
+```
+Input: title, description, startDate, endDate, location, maxCapacity
+       │
+       ▼
+  [event.ts] createEvent()
+       │
+       ├── Validasi: endDate >= startDate, maxCapacity > 0
+       ├── Status: "draft"
+       └── Raise: EventCreated
+```
+
+#### US2: Publish Event
+```
+Input: event (status "draft")
+       │
+       ▼
+  [event.ts] publishEvent()
+       │
+       ├── Validasi: minimal 1 kategori aktif
+       ├── Validasi: totalQuota <= maxCapacity
+       ├── Status: "published"
+       └── Raise: EventPublished
+```
+
+#### US3: Cancel Event
+```
+Input: event (status "draft" | "published")
+       │
+       ▼
+  [event.ts] cancelEvent()
+       │
+       ├── Validasi: bukan "completed" atau "cancelled"
+       ├── Status: "cancelled"
+       └── Raise: EventCancelled
+```
+
+#### US4: Create Ticket Category (child entity)
+```
+Input: event, name, price, quota, salesStart, salesEnd
+       │
+       ▼
+  [event.ts] addCategory()
+       │
+       ├── Validasi: event masih "draft" | "published"
+       ├── Validasi: salesEnd <= event.startDate
+       ├── Validasi: quota + currentTotal <= maxCapacity
+       ├── [ticket-category.ts] createTicketCategory()
+       └── Raise: TicketCategoryCreated
+```
+
+#### US5: Disable Ticket Category
+```
+Input: event, categoryId
+       │
+       ▼
+  [event.ts] disableCategory()
+       │
+       ├── Validasi: event belum "completed"
+       ├── [ticket-category.ts] deactivateCategory()
+       └── Raise: TicketCategoryDisabled
+```
+
+#### US8: Create Ticket Booking
+```
+Input: eventId, customerId, items[{categoryId, qty}], totalAmount, serviceFee
+       │
+       ▼
+  [booking.ts] createBooking()
+       │
+       ├── Validasi: items.length > 0
+       ├── Validasi: setiap item.quantity > 0
+       ├── Validasi: paymentDeadline > createdAt
+       ├── Status: "pending"
+       ├── Raise: BookingCreated, TicketReserved
+       └── [event.ts] reserveCategory() → [ticket-category.ts] reserveCategoryQuota()
+```
+
+#### US9: Calculate Booking Total Price
+```
+Input: booking items
+       │
+       ▼
+  [booking.ts] getSubtotal()
+       │
+       └── Sum(item.unitPrice × item.quantity) + serviceFee
+```
+
+#### US10: Pay Booking
+```
+Input: booking (status "pending"), amount
+       │
+       ▼
+  [booking.ts] payBooking()
+       │
+       ├── Validasi: status === "pending"
+       ├── Validasi: now <= paymentDeadline
+       ├── Validasi: amount === totalAmount
+       ├── Status: "paid", paidAt: now
+       └── Raise: BookingPaid
+```
+
+#### US11: Expire Booking
+```
+Input: booking (status "pending")
+       │
+       ▼
+  [booking.ts] expireBooking()
+       │
+       ├── Validasi: status === "pending"
+       ├── Status: "expired"
+       └── Raise: BookingExpired
+```
+
+#### US13: Check In Ticket
+```
+Input: ticket (status "active"), eventId
+       │
+       ▼
+  [ticket.ts] checkInTicket()
+       │
+       ├── Validasi: ticket.eventId === eventId
+       ├── Validasi: status === "active"
+       ├── Status: "checkedIn", checkedInAt: now
+       └── Raise: TicketCheckedIn
+```
+
+#### US14: Reject Invalid Ticket Check-in
+```
+Input: ticket (status "checkedIn" | "refunded" | "cancelled"), eventId
+       │
+       ▼
+  [ticket.ts] checkInTicket()
+       │
+       ├── ❌ Validasi gagal: ticket.eventId !== eventId  → throw "Ticket does not match the event"
+       └── ❌ Validasi gagal: status !== "active"        → throw "Ticket is not active"
+```
+
+#### US15: Request Refund
+```
+Input: bookingId, amount, reason
+       │
+       ▼
+  [refund.ts] createRefund()
+       │
+       ├── [booking.ts] markBookingRefunded() → validasi status "paid"
+       ├── [ticket.ts] markTicketRefunded()   → validasi status "active"
+       ├── Status: "requested"
+       └── Raise: RefundRequested
+```
+
+#### US16: Approve Refund
+```
+Input: refund (status "requested")
+       │
+       ▼
+  [refund.ts] approveRefund()
+       │
+       ├── Validasi: status === "requested"
+       ├── Status: "approved", resolvedAt: now
+       └── Raise: RefundApproved
+```
+
+#### US17: Reject Refund
+```
+Input: refund (status "requested"), reason
+       │
+       ▼
+  [refund.ts] rejectRefund()
+       │
+       ├── Validasi: status === "requested"
+       ├── Status: "rejected", resolvedAt: now, rejectionReason: reason
+       └── Raise: RefundRejected
+```
+
+#### US18: Mark Refund as Paid Out
+```
+Input: refund (status "approved"), paymentReference
+       │
+       ▼
+  [refund.ts] payoutRefund()
+       │
+       ├── Validasi: status === "approved"
+       ├── Status: "paidOut", paymentReference: ref
+       └── Raise: RefundPaidOut
+```
+
 ```
 # Run all tests
 bun run test
