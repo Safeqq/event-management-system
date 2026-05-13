@@ -1,128 +1,148 @@
-# Event Management System — Clean Architecture
+# Event Ticketing & Booking System — Clean Architecture & DDD
 
-Backend API untuk **Event Ticketing & Booking System** menggunakan **Bun + ElysiaJS + TypeScript** dengan pola **Clean Architecture & DDD Tactical Patterns**.
+Proyek ini dikembangkan untuk **EF2344-02 Konstruksi Perangkat Lunak** — **Departemen Teknik Informatika, ITS**.
 
-## Struktur Domain — 7 Komponen Utama
+**Topik:** Case Study – Event Ticketing & Booking System  
+**Arsitektur:** Clean Architecture + Domain-Driven Design Tactical Patterns  
+**Stack:** Bun + ElysiaJS + TypeScript
 
-### 1. Entities — `domain/entities/`
+---
+
+## Progress Week 9-10: Domain Layer & Unit Tests
+
+### 1. Aggregates — `domain/aggregates/`
+
+| File | Status Lifecycle | Domain Events |
+|---|---|---|
+| `aggregate-root.ts` | Base class | — |
+| `event.ts` | Draft → Published → Cancelled / Completed | `EventCreated`, `EventPublished`, `EventCancelled` |
+| `booking.ts` | Pending → Paid / Cancelled / Expired / Refunded | `BookingCreated`, `BookingPaid`, `BookingCancelled`, `BookingExpired` |
+| `ticket.ts` | Active → CheckedIn / Refunded / Cancelled | — |
+| `refund.ts` | Requested → Approved / Rejected → PaidOut | — |
+| `user.ts` | Organizer / Customer / Admin | — |
+| `promo-code.ts` | Percentage / Fixed discount | — |
+
+### 2. Entities — `domain/entities/`
+
 | File | Deskripsi |
 |---|---|
-| `entity.ts` | Abstract base class dengan `equals()` berdasarkan ID |
-| `event.ts` | **Event aggregate root** dengan business logic (publish, cancel) |
-| `booking.ts` | **Booking aggregate root** dengan business logic (pay, cancel, expire) |
-| `user.ts` | User entity (role: organizer, customer, admin) |
-| `ticket.ts` | Ticket entity (status: active, used, refunded, cancelled) |
-| `refund.ts` | Refund entity (status: requested, approved, rejected, paid_out) |
-| `promo-code.ts` | PromoCode entity (discount: percentage/fixed) |
-
-### 2. Aggregates
-**Event** dan **Booking** berfungsi sebagai **aggregate roots** yang mengenkapsulasi business logic dan invariants:
-
-- **Event Aggregate**: Mengelola lifecycle event (draft → published → cancelled) dan ticket categories
-- **Booking Aggregate**: Mengelola proses booking (pending → paid/cancelled/expired/refunded) dan booking items
-
-> **Note**: Aggregate roots ditempatkan di folder `entities/` tanpa folder `aggregates/` terpisah untuk kesederhanaan struktur.
+| `entity.ts` | Base class dengan `equals()` berdasarkan ID |
+| `ticket-category.ts` | Child entity dari Event (status: active, comingSoon, salesClosed, soldOut) |
 
 ### 3. Value Objects — `domain/value-objects/`
-| File | Deskripsi |
-|---|---|
-| `email.ts` | Validated email value object |
-| `money.ts` | Monetary value with currency (default IDR) |
-| `date-range.ts` | Date range with `contains()` & `isActive()` |
-| `ticket-code.ts` | Auto-generated unique ticket code (nanoid) |
 
-### 4. Domain Services — `api/*/service/`
-| File | Deskripsi |
+| File | Invariant |
 |---|---|
-| `api/event/service/event.service.ts` | Event service (create, publish, cancel) |
-| `api/booking/service/booking.service.ts` | Booking service (create, pay, cancel, expire) |
-| `api/ticket/service/ticket.service.ts` | Ticket service (check-in, get by customer) |
-| `api/refund/service/refund.service.ts` | Refund service (request, approve, reject, payout) |
-| `api/auth/service/auth.service.ts` | Auth service (register, login) |
-| `api/promo-code/service/promo-code.service.ts` | PromoCode service (validate, deactivate) |
-| `api/dashboard/service/dashboard.service.ts` | Dashboard service (stats) |
-| `api/customer/service/customer.service.ts` | Customer service (bookings, tickets) |
+| `email.ts` | Validasi format email |
+| `money.ts` | Amount >= 0, currency default IDR |
+| `date-range.ts` | End >= Start |
+| `ticket-code.ts` | Min 8 karakter, generate via nanoid |
+
+### 4. Domain Services — `domain/domain-services/`
+
+| File | Business Logic |
+|---|---|
+| `booking.service.ts` | Hitung total harga + validasi booking request |
+| `ticket-availability.service.ts` | Cek ketersediaan tiket per kategori |
 
 ### 5. Domain Events — `domain/domain-events/`
-| File | Deskripsi |
-|---|---|
-| `domain-event.ts` | Base interface untuk domain events (`occurredAt`, `eventType`) |
-| `events.ts` | Event classes: EventCreated, EventPublished, EventCancelled, BookingCreated, BookingPaid, BookingCancelled |
 
-> **Note**: Domain events digunakan untuk komunikasi antar bounded contexts dan tracking perubahan penting dalam domain.
+**15 domain events:**
 
-### 6. Repository Interfaces — `api/*/repository/`
-| File | Deskripsi |
+| Event | Trigger |
 |---|---|
-| `api/event/repository/event-repository.ts` | Event repository interface |
-| `api/booking/repository/booking-repository.ts` | Booking repository interface |
-| `api/ticket/repository/ticket-repository.ts` | Ticket repository interface |
-| `api/refund/repository/refund-repository.ts` | Refund repository interface |
-| `api/auth/repository/user-repository.ts` | User repository interface |
-| `api/promo-code/repository/promo-code-repository.ts` | PromoCode repository interface |
+| `EventCreated` | Event dibuat |
+| `EventPublished` | Event dipublikasi |
+| `EventCancelled` | Event dibatalkan |
+| `TicketCategoryCreated` | Kategori tiket ditambahkan |
+| `TicketCategoryDisabled` | Kategori tiket dinonaktifkan |
+| `BookingCreated` | Booking dibuat |
+| `BookingPaid` | Booking dibayar |
+| `BookingCancelled` | Booking dibatalkan |
+| `BookingExpired` | Booking kadaluarsa |
+| `TicketReserved` | Tiket direservasi |
+| `TicketCheckedIn` | Tiket di-check-in |
+| `RefundRequested` | Refund diminta |
+| `RefundApproved` | Refund disetujui |
+| `RefundRejected` | Refund ditolak |
+| `RefundPaidOut` | Refund dibayarkan |
+
+### 6. Repository Interfaces — `domain/repository-interfaces/`
+
+| Interface | Methods |
+|---|---|
+| `EventRepository` | findById, findAll, findByOrganizer, save, update, delete |
+| `BookingRepository` | findById, findByCustomer, findByEvent, save, update |
+| `TicketRepository` | findById, findByBooking, findByEvent, findByCustomer, findByCode, save, update |
+| `UserRepository` | findById, findByEmail, save, update |
+| `RefundRepository` | findById, findByBooking, save, update |
+| `PromoCodeRepository` | findById, findByCode, findAllActive, save, update |
 
 ### 7. Domain Unit Tests — `domain/tests/`
-| File | User Story |
-|---|---|
-| `value-objects.test.ts` | Email, Money, DateRange, TicketCode — validasi value object |
-| `entities.test.ts` | User entity — creation & equality |
-| `user-stories.test.ts` | 26 test — create & publish event, booking & payment, check-in tiket, refund flow, promo code, registrasi user |
+
+**70 tests — 0 fail**
+
+| File | Tests | Coverage |
+|---|---|---|
+| `user-stories.test.ts` | 64 | 12 minimum test cases + user stories + edge cases |
+| `entities.test.ts` | 2 | User entity equality |
+| `value-objects.test.ts` | 4 | Email, Money, DateRange, TicketCode |
+
+**12 Minimum Test Cases (AGENT.md §5):**
+
+| # | Test Case | Status |
+|---|---|---|
+| 1 | Event tidak bisa dibuat jika end date < start date | ✅ |
+| 2 | Event tidak bisa dibuat dengan kapasitas ≤ 0 | ✅ |
+| 3 | Event tidak bisa dipublish tanpa kategori tiket aktif | ✅ |
+| 4 | Kuota kategori tiket tidak boleh melebihi kapasitas event | ✅ |
+| 5 | Booking tidak bisa dibuat dengan quantity 0 | ✅ |
+| 6 | Booking tidak bisa dibayar setelah payment deadline | ✅ |
+| 7 | Booking tidak bisa dibayar dengan jumlah tidak sesuai | ✅ |
+| 8 | Booking paid tidak bisa expire | ✅ |
+| 9 | Tiket yang sudah check-in tidak bisa di-check-in lagi | ✅ |
+| 10 | Refund tidak bisa diminta jika tiket sudah check-in | ✅ |
+| 11 | Refund tidak bisa disetujui jika status bukan Requested | ✅ |
+| 12 | Refund ditolak harus menyertakan alasan | ✅ |
 
 ```bash
-bun test src/app/main/domain/tests/
-```
-
-```
-26 pass
- 0 fail
-```
-
-## Running Tests
-
-```bash
-# Semua domain tests
+# Semua test
 bun test src/app/main/domain/tests/
 
-# Specific test file
+# Atau via alias
+bun run test:domain
+
+# File spesifik
 bun test src/app/main/domain/tests/user-stories.test.ts
-bun test src/app/main/domain/tests/value-objects.test.ts
-bun test src/app/main/domain/tests/entities.test.ts
 ```
 
-## User Stories
+---
 
-### Event Organizer
-| Sebagai… | Saya ingin… | Sehingga… | Terkait |
-|---|---|---|---|
-| Organizer | membuat event dengan kategori tiket | peserta bisa memilih tiket yang sesuai | `Event` entity, `EventService` |
-| Organizer | mempublikasikan event | event bisa mulai dijual | `Event` entity, `EventService` |
-| Organizer | membatalkan event | peserta tidak bisa booking lagi | `Event` entity, `EventService` |
-| Organizer | melihat laporan penjualan | tahu jumlah tiket terjual & revenue | `DashboardService` |
-| Organizer | menyetujui/menolak refund | mengelola permintaan refund peserta | `RefundService` |
+## Ubiquitous Language Glossary
 
-### Customer / Peserta
-| Sebagai… | Saya ingin… | Sehingga… | Terkait |
-|---|---|---|---|
-| Customer | mendaftar akun | bisa melakukan booking | `User` entity, `AuthService` |
-| Customer | melihat daftar event | memilih event yang ingin dihadiri | `EventRepository` |
-| Customer | booking tiket | mendapatkan tiket masuk event | `Booking` entity, `BookingService` |
-| Customer | membayar booking | tiket saya aktif | `BookingService` |
-| Customer | request refund | mendapatkan uang kembali | `Refund` entity, `RefundService` |
-| Customer | melihat tiket saya | tahu tiket yang sudah dibeli | `TicketService` |
-
-### Gate Officer
-| Sebagai… | Saya ingin… | Sehingga… | Terkait |
-|---|---|---|---|
-| Gate Officer | check-in tiket | memverifikasi peserta masuk | `Ticket` entity, `TicketService` |
-
-### Admin
-| Sebagai… | Saya ingin… | Sehingga… | Terkait |
-|---|---|---|---|
-| Admin | payout refund | peserta menerima uang kembali | `RefundService` |
+| Istilah | Arti |
+|---|---|
+| **Event** | Kegiatan yang diorganisir oleh Event Organizer |
+| **Event Organizer** | User yang membuat dan mengelola event |
+| **Customer** | User yang booking dan membeli tiket |
+| **Gate Officer** | User yang memvalidasi tiket saat check-in |
+| **Ticket Category** | Jenis tiket (Regular, VIP, Early Bird) |
+| **Quota** | Jumlah maksimal tiket per kategori |
+| **Booking** | Reservasi sementara sebelum pembayaran |
+| **PendingPayment** | Booking yang belum dibayar |
+| **Paid** | Booking yang sudah dibayar |
+| **Expired** | Booking yang melewati deadline pembayaran |
+| **Ticket** | Bukti kehadiran setelah booking dibayar |
+| **Ticket Code** | Kode unik untuk validasi tiket |
+| **Check-in** | Validasi tiket saat masuk venue |
+| **Refund** | Pengembalian uang ke customer |
+| **Money** | Value object: jumlah + mata uang |
+| **Sales Period** | Periode penjualan tiket per kategori |
+| **Payment Deadline** | Batas waktu bayar (15 menit setelah booking) |
 
 ## Tech Stack
 
-- **Runtime**: [Bun](https://bun.sh/)
-- **Framework**: [ElysiaJS](https://elysiajs.com/)
-- **Language**: TypeScript
-- **Architecture**: Clean Architecture & DDD Tactical Patterns
+- **Runtime:** [Bun](https://bun.sh/)
+- **Framework:** [ElysiaJS](https://elysiajs.com/)
+- **Language:** TypeScript
+- **Architecture:** Clean Architecture + DDD Tactical Patterns

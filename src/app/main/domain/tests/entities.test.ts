@@ -1,16 +1,10 @@
 import { describe, it, expect } from "bun:test";
-import { User } from "../entities/user";
+import { User } from "../aggregates/user";
 import { Email } from "../value-objects/email";
 
 describe("User", () => {
   it("should create user with valid data", () => {
-    const user = new User(
-      "1",
-      "John Doe",
-      new Email("john@example.com"),
-      "customer",
-      new Date(),
-    );
+    const user = new User("1", "John Doe", new Email("john@example.com"), "customer", new Date());
     expect(user.name).toBe("John Doe");
     expect(user.role).toBe("customer");
   });
