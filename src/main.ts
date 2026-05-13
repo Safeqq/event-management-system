@@ -1,4 +1,4 @@
-import { createApp } from "./app/main/create-app";
+import { createApp } from "./app/create-app";
 
 const app = createApp();
 const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;

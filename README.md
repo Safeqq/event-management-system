@@ -148,7 +148,7 @@ Status: ✅ domain = logic ada di domain layer (Week 9-10), ❌ app layer = perl
 Input: title, description, startDate, endDate, location, maxCapacity
        │
        ▼
-  [src/app/main/domain/aggregates/event.ts] createEvent()
+  [src/app/domain/aggregates/event.ts] createEvent()
        │
        ├── Validasi: endDate >= startDate, maxCapacity > 0
        ├── Status: "draft"
@@ -160,7 +160,7 @@ Input: title, description, startDate, endDate, location, maxCapacity
 Input: event (status "draft")
        │
        ▼
-  [src/app/main/domain/aggregates/event.ts] publishEvent()
+  [src/app/domain/aggregates/event.ts] publishEvent()
        │
        ├── Validasi: minimal 1 kategori aktif
        ├── Validasi: totalQuota <= maxCapacity
@@ -173,7 +173,7 @@ Input: event (status "draft")
 Input: event (status "draft" | "published")
        │
        ▼
-  [src/app/main/domain/aggregates/event.ts] cancelEvent()
+  [src/app/domain/aggregates/event.ts] cancelEvent()
        │
        ├── Validasi: bukan "completed" atau "cancelled"
        ├── Status: "cancelled"
@@ -185,12 +185,12 @@ Input: event (status "draft" | "published")
 Input: event, name, price, quota, salesStart, salesEnd
        │
        ▼
-  [src/app/main/domain/aggregates/event.ts] addCategory()
+  [src/app/domain/aggregates/event.ts] addCategory()
        │
        ├── Validasi: event masih "draft" | "published"
        ├── Validasi: salesEnd <= event.startDate
        ├── Validasi: quota + currentTotal <= maxCapacity
-       ├──   [src/app/main/domain/entities/ticket-category.ts] createTicketCategory()
+       ├──   [src/app/domain/entities/ticket-category.ts] createTicketCategory()
        └── Raise: TicketCategoryCreated
 ```
 
@@ -199,10 +199,10 @@ Input: event, name, price, quota, salesStart, salesEnd
 Input: event, categoryId
        │
        ▼
-  [src/app/main/domain/aggregates/event.ts] disableCategory()
+  [src/app/domain/aggregates/event.ts] disableCategory()
        │
        ├── Validasi: event belum "completed"
-       ├──   [src/app/main/domain/entities/ticket-category.ts] deactivateCategory()
+       ├──   [src/app/domain/entities/ticket-category.ts] deactivateCategory()
        └── Raise: TicketCategoryDisabled
 ```
 
@@ -211,14 +211,14 @@ Input: event, categoryId
 Input: eventId, customerId, items[{categoryId, qty}], totalAmount, serviceFee
        │
        ▼
-  [src/app/main/domain/aggregates/booking.ts] createBooking()
+  [src/app/domain/aggregates/booking.ts] createBooking()
        │
        ├── Validasi: items.length > 0
        ├── Validasi: setiap item.quantity > 0
        ├── Validasi: paymentDeadline > createdAt
        ├── Status: "pending"
        ├── Raise: BookingCreated, TicketReserved
-       └── [event.ts] reserveCategory() →   [src/app/main/domain/entities/ticket-category.ts] reserveCategoryQuota()
+       └── [event.ts] reserveCategory() →   [src/app/domain/entities/ticket-category.ts] reserveCategoryQuota()
 ```
 
 #### US9: Calculate Booking Total Price
@@ -226,7 +226,7 @@ Input: eventId, customerId, items[{categoryId, qty}], totalAmount, serviceFee
 Input: booking items
        │
        ▼
-  [src/app/main/domain/aggregates/booking.ts] getSubtotal()
+  [src/app/domain/aggregates/booking.ts] getSubtotal()
        │
        └── Sum(item.unitPrice × item.quantity) + serviceFee
 ```
@@ -236,7 +236,7 @@ Input: booking items
 Input: booking (status "pending"), amount
        │
        ▼
-  [src/app/main/domain/aggregates/booking.ts] payBooking()
+  [src/app/domain/aggregates/booking.ts] payBooking()
        │
        ├── Validasi: status === "pending"
        ├── Validasi: now <= paymentDeadline
@@ -250,7 +250,7 @@ Input: booking (status "pending"), amount
 Input: booking (status "pending")
        │
        ▼
-  [src/app/main/domain/aggregates/booking.ts] expireBooking()
+  [src/app/domain/aggregates/booking.ts] expireBooking()
        │
        ├── Validasi: status === "pending"
        ├── Status: "expired"
@@ -262,7 +262,7 @@ Input: booking (status "pending")
 Input: ticket (status "active"), eventId
        │
        ▼
-  [src/app/main/domain/aggregates/ticket.ts] checkInTicket()
+  [src/app/domain/aggregates/ticket.ts] checkInTicket()
        │
        ├── Validasi: ticket.eventId === eventId
        ├── Validasi: status === "active"
@@ -275,7 +275,7 @@ Input: ticket (status "active"), eventId
 Input: ticket (status "checkedIn" | "refunded" | "cancelled"), eventId
        │
        ▼
-  [src/app/main/domain/aggregates/ticket.ts] checkInTicket()
+  [src/app/domain/aggregates/ticket.ts] checkInTicket()
        │
        ├── ❌ Validasi gagal: ticket.eventId !== eventId  → throw "Ticket does not match the event"
        └── ❌ Validasi gagal: status !== "active"        → throw "Ticket is not active"
@@ -286,7 +286,7 @@ Input: ticket (status "checkedIn" | "refunded" | "cancelled"), eventId
 Input: bookingId, amount, reason
        │
        ▼
-  [src/app/main/domain/aggregates/refund.ts] createRefund()
+  [src/app/domain/aggregates/refund.ts] createRefund()
        │
        ├── [booking.ts] markBookingRefunded() → validasi status "paid"
        ├── [ticket.ts] markTicketRefunded()   → validasi status "active"
@@ -299,7 +299,7 @@ Input: bookingId, amount, reason
 Input: refund (status "requested")
        │
        ▼
-  [src/app/main/domain/aggregates/refund.ts] approveRefund()
+  [src/app/domain/aggregates/refund.ts] approveRefund()
        │
        ├── Validasi: status === "requested"
        ├── Status: "approved", resolvedAt: now
@@ -311,7 +311,7 @@ Input: refund (status "requested")
 Input: refund (status "requested"), reason
        │
        ▼
-  [src/app/main/domain/aggregates/refund.ts] rejectRefund()
+  [src/app/domain/aggregates/refund.ts] rejectRefund()
        │
        ├── Validasi: status === "requested"
        ├── Status: "rejected", resolvedAt: now, rejectionReason: reason
@@ -323,7 +323,7 @@ Input: refund (status "requested"), reason
 Input: refund (status "approved"), paymentReference
        │
        ▼
-  [src/app/main/domain/aggregates/refund.ts] payoutRefund()
+  [src/app/domain/aggregates/refund.ts] payoutRefund()
        │
        ├── Validasi: status === "approved"
        ├── Status: "paidOut", paymentReference: ref
@@ -338,7 +338,7 @@ bun run test
 bun run test:domain
 
 # Run specific file
-bun test src/app/main/domain/tests/user-stories.test.ts
+bun test src/app/domain/tests/user-stories.test.ts
 ```
 
 ---

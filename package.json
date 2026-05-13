@@ -8,14 +8,14 @@
     "start": "bun src/main.ts",
     "build": "bun build src/index.ts --outdir dist --target bun --external elysia --external @elysiajs/swagger --external drizzle-orm --external postgres --external nanoid",
     "test": "bun test",
-    "test:domain": "bun test src/app/main/domain/tests/",
+    "test:domain": "bun test src/app/domain/tests/",
     "lint:error": "tsc --noEmit --pretty false | Select-String \"error\"",
     "typecheck": "tsc --noEmit",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
-    "db:seed": "bun run src/app/main/database/drizzle/seeds/seed.ts"
+    "db:seed": "bun run src/app/database/drizzle/seeds/seed.ts"
   },
   "dependencies": {
     "@elysiajs/jwt": "^1.4.2",
