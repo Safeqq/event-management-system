@@ -28,15 +28,15 @@ Proyek ini dikembangkan untuk **EF2344-02 Konstruksi Perangkat Lunak** -- **Depa
 | `booking.ts` | Pending -> Paid / Cancelled / Expired / Refunded | `BookingCreated`, `TicketReserved`, `BookingPaid`, `BookingCancelled`, `BookingExpired` |
 | `ticket.ts` | Active -> CheckedIn / Refunded / Cancelled | `TicketCheckedIn` |
 | `refund.ts` | Requested -> Approved / Rejected -> PaidOut | `RefundRequested`, `RefundApproved`, `RefundRejected`, `RefundPaidOut` |
-| `user.ts` | Organizer / Customer / Admin | -- |
-| `promo-code.ts` | Percentage / Fixed discount | -- |
 
 ### 2. Entities -- `domain/entities/`
 
-| File | Description |
-|---|---|
-| `entity.ts` | Base `Entity` interface + `equalsEntity()` function |
-| `ticket-category.ts` | Child entity of Event (status: active, comingSoon, salesClosed, soldOut) |
+| File | Extends | Description |
+|---|---|---|
+| `entity.ts` | -- | Base `Entity` interface + `equalsEntity()` function |
+| `ticket-category.ts` | `Entity` | Child entity of Event (status: active, comingSoon, salesClosed, soldOut) |
+| `user.ts` | `Entity` | Standalone entity (roles: organizer, customer, admin) |
+| `promo-code.ts` | `Entity` | Standalone entity with validation, usage, deactivation logic |
 
 ### 3. Value Objects -- `domain/value-objects/`
 
@@ -93,9 +93,9 @@ Proyek ini dikembangkan untuk **EF2344-02 Konstruksi Perangkat Lunak** -- **Depa
 
 | File | Tests | Coverage |
 |---|---|---|
-| `user-stories.test.ts` | 68 | 12 minimum test cases + user stories + domain event assertions + edge cases |
+| `user-stories.test.ts` | 68 | All 12 minimum test cases + user stories + domain event assertions + PromoCode/TicketCategory logic |
 | `entities.test.ts` | 2 | User entity equality |
-| `value-objects.test.ts` | 4 | Email, Money, DateRange, TicketCode |
+| `value-objects.test.ts` | 6 | Email, Money, DateRange, TicketCode |
 
 **12 Minimum Test Cases (AGENT.md SS5):**
 
