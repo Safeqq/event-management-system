@@ -21,16 +21,35 @@ export interface TicketState extends Aggregate {
 }
 
 export const createTicket = (
-  id: string, bookingId: string, eventId: string, categoryName: string,
-  code: string, price: Money, status: TicketStatus, customerName: string,
-  customerEmail: string, createdAt: Date, checkedInAt: Date | null,
+  id: string,
+  bookingId: string,
+  eventId: string,
+  categoryName: string,
+  code: string,
+  price: Money,
+  status: TicketStatus,
+  customerName: string,
+  customerEmail: string,
+  createdAt: Date,
+  checkedInAt: Date | null,
 ): TicketState => ({
-  id, bookingId, eventId, categoryName, code, price, status,
-  customerName, customerEmail, createdAt, checkedInAt, domainEvents: [],
+  id,
+  bookingId,
+  eventId,
+  categoryName,
+  code,
+  price,
+  status,
+  customerName,
+  customerEmail,
+  createdAt,
+  checkedInAt,
+  domainEvents: [],
 });
 
 export const checkInTicket = (ticket: TicketState, eventId: string): void => {
-  if (ticket.eventId !== eventId) throw new Error("Ticket does not match the event");
+  if (ticket.eventId !== eventId)
+    throw new Error("Ticket does not match the event");
   if (ticket.status !== "active") throw new Error("Ticket is not active");
   ticket.status = "checkedIn";
   ticket.checkedInAt = new Date();
@@ -38,11 +57,13 @@ export const checkInTicket = (ticket: TicketState, eventId: string): void => {
 };
 
 export const markTicketRefunded = (ticket: TicketState): void => {
-  if (ticket.status !== "active") throw new Error("Only active tickets can be refunded");
+  if (ticket.status !== "active")
+    throw new Error("Only active tickets can be refunded");
   ticket.status = "refunded";
 };
 
 export const cancelTicket = (ticket: TicketState): void => {
-  if (ticket.status !== "active") throw new Error("Only active tickets can be cancelled");
+  if (ticket.status !== "active")
+    throw new Error("Only active tickets can be cancelled");
   ticket.status = "cancelled";
 };

@@ -11,6 +11,16 @@ export interface UserState extends Entity {
   createdAt: Date;
 }
 
-export const createUser = (id: string, name: string, email: Email, role: UserRole, createdAt: Date): UserState => ({
-  id, name, email, role, createdAt,
+export const createUser = (
+  id: string,
+  name: string,
+  email: Email,
+  role: UserRole,
+  createdAt: Date,
+): UserState => ({
+  id,
+  name,
+  email,
+  role,
+  createdAt,
 });

@@ -6,8 +6,14 @@ export interface EventCreated extends DomainEvent {
   readonly organizerId: string;
 }
 
-export const createEventCreated = (eventId: string, organizerId: string): EventCreated => ({
-  occurredAt: new Date(), eventType: "EventCreated", eventId, organizerId,
+export const createEventCreated = (
+  eventId: string,
+  organizerId: string,
+): EventCreated => ({
+  occurredAt: new Date(),
+  eventType: "EventCreated",
+  eventId,
+  organizerId,
 });
 
 export interface EventPublished extends DomainEvent {
@@ -16,7 +22,9 @@ export interface EventPublished extends DomainEvent {
 }
 
 export const createEventPublished = (eventId: string): EventPublished => ({
-  occurredAt: new Date(), eventType: "EventPublished", eventId,
+  occurredAt: new Date(),
+  eventType: "EventPublished",
+  eventId,
 });
 
 export interface EventCancelled extends DomainEvent {
@@ -25,7 +33,9 @@ export interface EventCancelled extends DomainEvent {
 }
 
 export const createEventCancelled = (eventId: string): EventCancelled => ({
-  occurredAt: new Date(), eventType: "EventCancelled", eventId,
+  occurredAt: new Date(),
+  eventType: "EventCancelled",
+  eventId,
 });
 
 export interface TicketCategoryCreated extends DomainEvent {
@@ -34,8 +44,14 @@ export interface TicketCategoryCreated extends DomainEvent {
   readonly categoryId: string;
 }
 
-export const createTicketCategoryCreated = (eventId: string, categoryId: string): TicketCategoryCreated => ({
-  occurredAt: new Date(), eventType: "TicketCategoryCreated", eventId, categoryId,
+export const createTicketCategoryCreated = (
+  eventId: string,
+  categoryId: string,
+): TicketCategoryCreated => ({
+  occurredAt: new Date(),
+  eventType: "TicketCategoryCreated",
+  eventId,
+  categoryId,
 });
 
 export interface TicketCategoryDisabled extends DomainEvent {
@@ -44,8 +60,14 @@ export interface TicketCategoryDisabled extends DomainEvent {
   readonly categoryId: string;
 }
 
-export const createTicketCategoryDisabled = (eventId: string, categoryId: string): TicketCategoryDisabled => ({
-  occurredAt: new Date(), eventType: "TicketCategoryDisabled", eventId, categoryId,
+export const createTicketCategoryDisabled = (
+  eventId: string,
+  categoryId: string,
+): TicketCategoryDisabled => ({
+  occurredAt: new Date(),
+  eventType: "TicketCategoryDisabled",
+  eventId,
+  categoryId,
 });
 
 export interface BookingCreated extends DomainEvent {
@@ -56,8 +78,18 @@ export interface BookingCreated extends DomainEvent {
   readonly totalAmount: number;
 }
 
-export const createBookingCreated = (bookingId: string, eventId: string, customerId: string, totalAmount: number): BookingCreated => ({
-  occurredAt: new Date(), eventType: "BookingCreated", bookingId, eventId, customerId, totalAmount,
+export const createBookingCreated = (
+  bookingId: string,
+  eventId: string,
+  customerId: string,
+  totalAmount: number,
+): BookingCreated => ({
+  occurredAt: new Date(),
+  eventType: "BookingCreated",
+  bookingId,
+  eventId,
+  customerId,
+  totalAmount,
 });
 
 export interface BookingPaid extends DomainEvent {
@@ -66,8 +98,14 @@ export interface BookingPaid extends DomainEvent {
   readonly amount: number;
 }
 
-export const createBookingPaid = (bookingId: string, amount: number): BookingPaid => ({
-  occurredAt: new Date(), eventType: "BookingPaid", bookingId, amount,
+export const createBookingPaid = (
+  bookingId: string,
+  amount: number,
+): BookingPaid => ({
+  occurredAt: new Date(),
+  eventType: "BookingPaid",
+  bookingId,
+  amount,
 });
 
 export interface BookingCancelled extends DomainEvent {
@@ -75,8 +113,12 @@ export interface BookingCancelled extends DomainEvent {
   readonly bookingId: string;
 }
 
-export const createBookingCancelled = (bookingId: string): BookingCancelled => ({
-  occurredAt: new Date(), eventType: "BookingCancelled", bookingId,
+export const createBookingCancelled = (
+  bookingId: string,
+): BookingCancelled => ({
+  occurredAt: new Date(),
+  eventType: "BookingCancelled",
+  bookingId,
 });
 
 export interface BookingExpired extends DomainEvent {
@@ -85,7 +127,9 @@ export interface BookingExpired extends DomainEvent {
 }
 
 export const createBookingExpired = (bookingId: string): BookingExpired => ({
-  occurredAt: new Date(), eventType: "BookingExpired", bookingId,
+  occurredAt: new Date(),
+  eventType: "BookingExpired",
+  bookingId,
 });
 
 export interface TicketReserved extends DomainEvent {
@@ -95,8 +139,16 @@ export interface TicketReserved extends DomainEvent {
   readonly quantity: number;
 }
 
-export const createTicketReserved = (bookingId: string, eventId: string, quantity: number): TicketReserved => ({
-  occurredAt: new Date(), eventType: "TicketReserved", bookingId, eventId, quantity,
+export const createTicketReserved = (
+  bookingId: string,
+  eventId: string,
+  quantity: number,
+): TicketReserved => ({
+  occurredAt: new Date(),
+  eventType: "TicketReserved",
+  bookingId,
+  eventId,
+  quantity,
 });
 
 export interface TicketCheckedIn extends DomainEvent {
@@ -105,8 +157,14 @@ export interface TicketCheckedIn extends DomainEvent {
   readonly ticketCode: string;
 }
 
-export const createTicketCheckedIn = (ticketId: string, ticketCode: string): TicketCheckedIn => ({
-  occurredAt: new Date(), eventType: "TicketCheckedIn", ticketId, ticketCode,
+export const createTicketCheckedIn = (
+  ticketId: string,
+  ticketCode: string,
+): TicketCheckedIn => ({
+  occurredAt: new Date(),
+  eventType: "TicketCheckedIn",
+  ticketId,
+  ticketCode,
 });
 
 export interface RefundRequested extends DomainEvent {
@@ -115,8 +173,14 @@ export interface RefundRequested extends DomainEvent {
   readonly bookingId: string;
 }
 
-export const createRefundRequested = (refundId: string, bookingId: string): RefundRequested => ({
-  occurredAt: new Date(), eventType: "RefundRequested", refundId, bookingId,
+export const createRefundRequested = (
+  refundId: string,
+  bookingId: string,
+): RefundRequested => ({
+  occurredAt: new Date(),
+  eventType: "RefundRequested",
+  refundId,
+  bookingId,
 });
 
 export interface RefundApproved extends DomainEvent {
@@ -125,8 +189,14 @@ export interface RefundApproved extends DomainEvent {
   readonly bookingId: string;
 }
 
-export const createRefundApproved = (refundId: string, bookingId: string): RefundApproved => ({
-  occurredAt: new Date(), eventType: "RefundApproved", refundId, bookingId,
+export const createRefundApproved = (
+  refundId: string,
+  bookingId: string,
+): RefundApproved => ({
+  occurredAt: new Date(),
+  eventType: "RefundApproved",
+  refundId,
+  bookingId,
 });
 
 export interface RefundRejected extends DomainEvent {
@@ -136,8 +206,16 @@ export interface RefundRejected extends DomainEvent {
   readonly reason: string;
 }
 
-export const createRefundRejected = (refundId: string, bookingId: string, reason: string): RefundRejected => ({
-  occurredAt: new Date(), eventType: "RefundRejected", refundId, bookingId, reason,
+export const createRefundRejected = (
+  refundId: string,
+  bookingId: string,
+  reason: string,
+): RefundRejected => ({
+  occurredAt: new Date(),
+  eventType: "RefundRejected",
+  refundId,
+  bookingId,
+  reason,
 });
 
 export interface RefundPaidOut extends DomainEvent {
@@ -147,6 +225,14 @@ export interface RefundPaidOut extends DomainEvent {
   readonly paymentReference: string;
 }
 
-export const createRefundPaidOut = (refundId: string, bookingId: string, paymentReference: string): RefundPaidOut => ({
-  occurredAt: new Date(), eventType: "RefundPaidOut", refundId, bookingId, paymentReference,
+export const createRefundPaidOut = (
+  refundId: string,
+  bookingId: string,
+  paymentReference: string,
+): RefundPaidOut => ({
+  occurredAt: new Date(),
+  eventType: "RefundPaidOut",
+  refundId,
+  bookingId,
+  paymentReference,
 });
