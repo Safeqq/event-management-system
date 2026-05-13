@@ -47,7 +47,10 @@ export const createBooking = (
   createdAt: Date,
   paidAt: Date | null,
   paymentDeadline: Date,
+  eventIsPublished?: boolean,
 ): BookingState => {
+  if (eventIsPublished === false)
+    throw new Error("Booking can only be created for published events");
   if (items.length === 0)
     throw new Error("Booking must have at least one item");
   for (const item of items) {
