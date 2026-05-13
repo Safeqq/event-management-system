@@ -1,19 +1,19 @@
 import { describe, it, expect } from "bun:test";
-import { Email } from "../value-objects/email";
-import { Money } from "../value-objects/money";
-import { DateRange } from "../value-objects/date-range";
-import { TicketCode } from "../value-objects/ticket-code";
+import { createEmail } from "../value-objects/email";
+import { createMoney } from "../value-objects/money";
+import { createDateRange } from "../value-objects/date-range";
+import { generateTicketCode } from "../value-objects/ticket-code";
 
 describe("Email", () => {
   it("should create valid email", () => {
-    const email = new Email("test@example.com");
+    const email = createEmail("test@example.com");
     expect(email.value).toBe("test@example.com");
   });
 });
 
 describe("Money", () => {
   it("should create money with valid amount", () => {
-    const money = new Money(10000);
+    const money = createMoney(10000);
     expect(money.amount).toBe(10000);
   });
 });
@@ -22,14 +22,14 @@ describe("DateRange", () => {
   it("should create valid date range", () => {
     const start = new Date("2026-01-01");
     const end = new Date("2026-12-31");
-    const range = new DateRange(start, end);
+    const range = createDateRange(start, end);
     expect(range.start).toBe(start);
   });
 });
 
 describe("TicketCode", () => {
   it("should generate valid ticket code", () => {
-    const code = TicketCode.generate();
+    const code = generateTicketCode();
     expect(code.value.length).toBeGreaterThanOrEqual(8);
   });
 });

@@ -1,39 +1,48 @@
-import { Entity } from "../entities/entity";
-import { Money } from "../value-objects/money";
+import { type Aggregate, addDomainEvent } from "./aggregate-root";
+import { createTicketCheckedIn } from "../domain-events/events";
+import type { Money } from "../value-objects/money";
+import type { DomainEvent } from "../domain-events/domain-event";
 
 export type TicketStatus = "active" | "checkedIn" | "refunded" | "cancelled";
 
-export class Ticket extends Entity {
-  constructor(
-    public readonly id: string,
-    public bookingId: string,
-    public eventId: string,
-    public categoryName: string,
-    public code: string,
-    public price: Money,
-    public status: TicketStatus,
-    public customerName: string,
-    public customerEmail: string,
-    public readonly createdAt: Date,
-    public checkedInAt: Date | null,
-  ) {
-    super(id);
-  }
-
-  checkIn(eventId: string): void {
-    if (this.eventId !== eventId) throw new Error("Ticket does not match the event");
-    if (this.status !== "active") throw new Error("Ticket is not active");
-    this.status = "checkedIn";
-    this.checkedInAt = new Date();
-  }
-
-  markRefunded(): void {
-    if (this.status !== "active") throw new Error("Only active tickets can be refunded");
-    this.status = "refunded";
-  }
-
-  cancel(): void {
-    if (this.status !== "active") throw new Error("Only active tickets can be cancelled");
-    this.status = "cancelled";
-  }
+export interface TicketState extends Aggregate {
+  id: string;
+  bookingId: string;
+  eventId: string;
+  categoryName: string;
+  code: string;
+  price: Money;
+  status: TicketStatus;
+  customerName: string;
+  customerEmail: string;
+  createdAt: Date;
+  checkedInAt: Date | null;
+  domainEvents: DomainEvent[];
 }
+
+export const createTicket = (
+  id: string, bookingId: string, eventId: string, categoryName: string,
+  code: string, price: Money, status: TicketStatus, customerName: string,
+  customerEmail: string, createdAt: Date, checkedInAt: Date | null,
+): TicketState => ({
+  id, bookingId, eventId, categoryName, code, price, status,
+  customerName, customerEmail, createdAt, checkedInAt, domainEvents: [],
+});
+
+export const checkInTicket = (ticket: TicketState, eventId: string): void => {
+  if (ticket.eventId !== eventId) throw new Error("Ticket does not match the event");
+  if (ticket.status !== "active") throw new Error("Ticket is not active");
+  ticket.status = "checkedIn";
+  ticket.checkedInAt = new Date();
+  addDomainEvent(ticket, createTicketCheckedIn(ticket.id, ticket.code));
+};
+
+export const markTicketRefunded = (ticket: TicketState): void => {
+  if (ticket.status !== "active") throw new Error("Only active tickets can be refunded");
+  ticket.status = "refunded";
+};
+
+export const cancelTicket = (ticket: TicketState): void => {
+  if (ticket.status !== "active") throw new Error("Only active tickets can be cancelled");
+  ticket.status = "cancelled";
+};

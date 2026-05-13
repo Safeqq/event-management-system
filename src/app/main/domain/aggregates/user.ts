@@ -1,16 +1,16 @@
-import { Entity } from "../entities/entity";
-import { Email } from "../value-objects/email";
+import type { Email } from "../value-objects/email";
+import type { Entity } from "../entities/entity";
 
 export type UserRole = "organizer" | "customer" | "admin";
 
-export class User extends Entity {
-  constructor(
-    public readonly id: string,
-    public name: string,
-    public email: Email,
-    public role: UserRole,
-    public readonly createdAt: Date,
-  ) {
-    super(id);
-  }
+export interface UserState extends Entity {
+  id: string;
+  name: string;
+  email: Email;
+  role: UserRole;
+  createdAt: Date;
 }
+
+export const createUser = (id: string, name: string, email: Email, role: UserRole, createdAt: Date): UserState => ({
+  id, name, email, role, createdAt,
+});

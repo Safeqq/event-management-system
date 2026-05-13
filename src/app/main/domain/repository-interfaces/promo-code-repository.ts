@@ -1,9 +1,9 @@
-import { PromoCode } from "../aggregates/promo-code";
+import type { PromoCodeState } from "../aggregates/promo-code";
 
 export interface PromoCodeRepository {
-  findById(id: string): Promise<PromoCode | null>;
-  findByCode(code: string): Promise<PromoCode | null>;
-  findAllActive(): Promise<PromoCode[]>;
-  save(promoCode: PromoCode): Promise<void>;
-  update(promoCode: PromoCode): Promise<void>;
+  findById(id: string): Promise<PromoCodeState | null>;
+  findByCode(code: string): Promise<PromoCodeState | null>;
+  findAllActive(): Promise<PromoCodeState[]>;
+  save(promoCode: PromoCodeState): Promise<void>;
+  update(promoCode: PromoCodeState): Promise<void>;
 }

@@ -1,9 +1,9 @@
-export abstract class Entity {
-  constructor(public readonly id: string) {}
-
-  public equals(other: Entity): boolean {
-    if (other === null || other === undefined) return false;
-    if (other.constructor !== this.constructor) return false;
-    return this.id === other.id;
-  }
+export interface Entity {
+  id: string;
 }
+
+export const equalsEntity = (a: Entity, b: Entity): boolean => {
+  if (a === null || a === undefined || b === null || b === undefined)
+    return false;
+  return a.id === b.id;
+};

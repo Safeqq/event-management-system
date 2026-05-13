@@ -1,14 +1,14 @@
-import { DomainEvent } from "../domain-events/domain-event";
+import type { DomainEvent } from "../domain-events/domain-event";
+import type { Entity } from "../entities/entity";
 
-export abstract class AggregateRoot {
-  private _domainEvents: DomainEvent[] = [];
-  public get domainEvents(): DomainEvent[] {
-    return [...this._domainEvents];
-  }
-  protected addDomainEvent(event: DomainEvent): void {
-    this._domainEvents.push(event);
-  }
-  public clearEvents(): void {
-    this._domainEvents = [];
-  }
+export interface Aggregate extends Entity {
+  domainEvents: DomainEvent[];
 }
+
+export const addDomainEvent = (agg: Aggregate, event: DomainEvent): void => {
+  agg.domainEvents.push(event);
+};
+
+export const clearDomainEvents = (agg: Aggregate): void => {
+  agg.domainEvents = [];
+};

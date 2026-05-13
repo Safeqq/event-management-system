@@ -1,15 +1,17 @@
 import { nanoid } from "nanoid";
 
-export class TicketCode {
-  constructor(public readonly value: string) {
-    if (!value || value.length < 8) throw new Error("Invalid ticket code");
-  }
-
-  static generate(): TicketCode {
-    return new TicketCode(nanoid(12).toUpperCase());
-  }
-
-  equals(other: TicketCode): boolean {
-    return this.value === other.value;
-  }
+export interface TicketCode {
+  readonly value: string;
 }
+
+export const createTicketCode = (value: string): TicketCode => {
+  if (!value || value.length < 8) throw new Error("Invalid ticket code");
+  return { value };
+};
+
+export const generateTicketCode = (): TicketCode => ({
+  value: nanoid(12).toUpperCase(),
+});
+
+export const equalsTicketCode = (a: TicketCode, b: TicketCode): boolean =>
+  a.value === b.value;

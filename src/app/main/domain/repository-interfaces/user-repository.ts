@@ -1,8 +1,8 @@
-import { User } from "../aggregates/user";
+import type { UserState } from "../aggregates/user";
 
 export interface UserRepository {
-  findById(id: string): Promise<User | null>;
-  findByEmail(email: string): Promise<User | null>;
-  save(user: User): Promise<void>;
-  update(user: User): Promise<void>;
+  findById(id: string): Promise<UserState | null>;
+  findByEmail(email: string): Promise<UserState | null>;
+  save(user: UserState): Promise<void>;
+  update(user: UserState): Promise<void>;
 }

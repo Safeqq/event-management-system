@@ -1,10 +1,9 @@
-import { AggregateRoot } from "./aggregate-root";
+import { type Aggregate, addDomainEvent } from "./aggregate-root";
 import {
-  BookingCreated,
-  BookingPaid,
-  BookingCancelled,
-  BookingExpired,
+  createBookingCreated, createBookingPaid, createBookingCancelled,
+  createBookingExpired, createTicketReserved,
 } from "../domain-events/events";
+import type { DomainEvent } from "../domain-events/domain-event";
 
 export type BookingStatus = "pending" | "paid" | "cancelled" | "expired" | "refunded";
 
@@ -15,54 +14,65 @@ export interface BookingItem {
   unitPrice: number;
 }
 
-export class Booking extends AggregateRoot {
-  constructor(
-    public readonly id: string,
-    public eventId: string,
-    public customerId: string,
-    public items: BookingItem[],
-    public totalAmount: number,
-    public serviceFee: number,
-    public status: BookingStatus,
-    public readonly createdAt: Date,
-    public paidAt: Date | null,
-    public readonly paymentDeadline: Date,
-  ) {
-    super();
-    if (items.length === 0) throw new Error("Booking must have at least one item");
-    for (const item of items) {
-      if (item.quantity <= 0) throw new Error("Ticket quantity must be greater than zero");
-    }
-    this.addDomainEvent(new BookingCreated(this.id, this.eventId, this.customerId, this.totalAmount));
-  }
-
-  get subtotal(): number {
-    return this.items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
-  }
-
-  pay(amount: number): void {
-    if (this.status !== "pending") throw new Error("Only pending bookings can be paid");
-    if (new Date() > this.paymentDeadline) throw new Error("Payment deadline has passed");
-    if (amount < this.totalAmount) throw new Error("Payment amount must equal total booking price");
-    this.status = "paid";
-    this.paidAt = new Date();
-    this.addDomainEvent(new BookingPaid(this.id, this.totalAmount));
-  }
-
-  cancel(): void {
-    if (this.status === "cancelled" || this.status === "refunded") throw new Error("Booking is already finalised");
-    this.status = "cancelled";
-    this.addDomainEvent(new BookingCancelled(this.id));
-  }
-
-  expire(): void {
-    if (this.status !== "pending") throw new Error("Only pending bookings can expire");
-    this.status = "expired";
-    this.addDomainEvent(new BookingExpired(this.id));
-  }
-
-  markRefunded(): void {
-    if (this.status !== "paid") throw new Error("Only paid bookings can be refunded");
-    this.status = "refunded";
-  }
+export interface BookingState extends Aggregate {
+  id: string;
+  eventId: string;
+  customerId: string;
+  items: BookingItem[];
+  totalAmount: number;
+  serviceFee: number;
+  status: BookingStatus;
+  createdAt: Date;
+  paidAt: Date | null;
+  paymentDeadline: Date;
+  domainEvents: DomainEvent[];
 }
+
+export const createBooking = (
+  id: string, eventId: string, customerId: string, items: BookingItem[],
+  totalAmount: number, serviceFee: number, status: BookingStatus,
+  createdAt: Date, paidAt: Date | null, paymentDeadline: Date,
+): BookingState => {
+  if (items.length === 0) throw new Error("Booking must have at least one item");
+  for (const item of items) {
+    if (item.quantity <= 0) throw new Error("Ticket quantity must be greater than zero");
+  }
+  if (paymentDeadline <= createdAt) throw new Error("Payment deadline must be after creation time");
+  const booking: BookingState = {
+    id, eventId, customerId, items, totalAmount, serviceFee,
+    status, createdAt, paidAt, paymentDeadline, domainEvents: [],
+  };
+  const totalQuantity = items.reduce((sum, i) => sum + i.quantity, 0);
+  addDomainEvent(booking, createBookingCreated(id, eventId, customerId, totalAmount));
+  addDomainEvent(booking, createTicketReserved(id, eventId, totalQuantity));
+  return booking;
+};
+
+export const getSubtotal = (booking: BookingState): number =>
+  booking.items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
+
+export const payBooking = (booking: BookingState, amount: number): void => {
+  if (booking.status !== "pending") throw new Error("Only pending bookings can be paid");
+  if (new Date() > booking.paymentDeadline) throw new Error("Payment deadline has passed");
+  if (amount < booking.totalAmount) throw new Error("Payment amount must equal total booking price");
+  booking.status = "paid";
+  booking.paidAt = new Date();
+  addDomainEvent(booking, createBookingPaid(booking.id, booking.totalAmount));
+};
+
+export const cancelBooking = (booking: BookingState): void => {
+  if (booking.status === "cancelled" || booking.status === "refunded") throw new Error("Booking is already finalised");
+  booking.status = "cancelled";
+  addDomainEvent(booking, createBookingCancelled(booking.id));
+};
+
+export const expireBooking = (booking: BookingState): void => {
+  if (booking.status !== "pending") throw new Error("Only pending bookings can expire");
+  booking.status = "expired";
+  addDomainEvent(booking, createBookingExpired(booking.id));
+};
+
+export const markBookingRefunded = (booking: BookingState): void => {
+  if (booking.status !== "paid") throw new Error("Only paid bookings can be refunded");
+  booking.status = "refunded";
+};

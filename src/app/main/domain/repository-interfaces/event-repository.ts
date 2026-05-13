@@ -1,10 +1,10 @@
-import { Event } from "../aggregates/event";
+import type { EventState } from "../aggregates/event";
 
 export interface EventRepository {
-  findById(id: string): Promise<Event | null>;
-  findAll(): Promise<Event[]>;
-  findByOrganizer(organizerId: string): Promise<Event[]>;
-  save(event: Event): Promise<void>;
-  update(event: Event): Promise<void>;
+  findById(id: string): Promise<EventState | null>;
+  findAll(): Promise<EventState[]>;
+  findByOrganizer(organizerId: string): Promise<EventState[]>;
+  save(event: EventState): Promise<void>;
+  update(event: EventState): Promise<void>;
   delete(id: string): Promise<void>;
 }

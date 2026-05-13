@@ -1,11 +1,11 @@
-import { Ticket } from "../aggregates/ticket";
+import type { TicketState } from "../aggregates/ticket";
 
 export interface TicketRepository {
-  findById(id: string): Promise<Ticket | null>;
-  findByBooking(bookingId: string): Promise<Ticket[]>;
-  findByEvent(eventId: string): Promise<Ticket[]>;
-  findByCustomer(customerEmail: string): Promise<Ticket[]>;
-  findByCode(code: string): Promise<Ticket | null>;
-  save(ticket: Ticket): Promise<void>;
-  update(ticket: Ticket): Promise<void>;
+  findById(id: string): Promise<TicketState | null>;
+  findByBooking(bookingId: string): Promise<TicketState[]>;
+  findByEvent(eventId: string): Promise<TicketState[]>;
+  findByCustomer(customerEmail: string): Promise<TicketState[]>;
+  findByCode(code: string): Promise<TicketState | null>;
+  save(ticket: TicketState): Promise<void>;
+  update(ticket: TicketState): Promise<void>;
 }

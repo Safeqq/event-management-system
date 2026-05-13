@@ -1,8 +1,8 @@
-import { Refund } from "../aggregates/refund";
+import type { RefundState } from "../aggregates/refund";
 
 export interface RefundRepository {
-  findById(id: string): Promise<Refund | null>;
-  findByBooking(bookingId: string): Promise<Refund[]>;
-  save(refund: Refund): Promise<void>;
-  update(refund: Refund): Promise<void>;
+  findById(id: string): Promise<RefundState | null>;
+  findByBooking(bookingId: string): Promise<RefundState[]>;
+  save(refund: RefundState): Promise<void>;
+  update(refund: RefundState): Promise<void>;
 }

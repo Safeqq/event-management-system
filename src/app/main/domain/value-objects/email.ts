@@ -1,13 +1,13 @@
-export class Email {
-  constructor(public readonly value: string) {
-    if (!this.isValid(value)) throw new Error("Invalid email format");
-  }
-
-  private isValid(email: string): boolean {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  }
-
-  equals(other: Email): boolean {
-    return this.value === other.value;
-  }
+export interface Email {
+  readonly value: string;
 }
+
+const isValidEmail = (value: string): boolean =>
+  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+
+export const createEmail = (value: string): Email => {
+  if (!isValidEmail(value)) throw new Error("Invalid email format");
+  return { value };
+};
+
+export const equalsEmail = (a: Email, b: Email): boolean => a.value === b.value;
